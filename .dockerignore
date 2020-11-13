@@ -1,0 +1,11 @@
+# Dockerfile
+Dockerfile
+
+# gradle, mvn and build output
+.gradle/
+.mvn/
+build/
+bin/
+
+# Ignore devspace.yaml file to prevent image rebuilding after config changes
+devspace.yaml

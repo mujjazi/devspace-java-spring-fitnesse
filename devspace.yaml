@@ -1,0 +1,92 @@
+version: v1beta9                      # Config reference: https://devspace.sh/cli/docs/configuration/reference
+images:
+  app:                                # Internal name of the image (will be refered in `dev` section below)
+    image: ${IMAGE}                   # Where to push the image (also see `tags`, `dockerfile` and `context` options)
+    preferSyncOverRebuild: true       # Build image once, then prefer to use hot reloading instead of code sync
+    injectRestartHelper: true
+    appendDockerfileInstructions:     # Will be added to the Dockerfile in-memory before building the image (add dev tooling etc.)
+    - USER root
+    entrypoint:                       # Dev entrypoint for the image (could also be added using appendDockerfileInstructions
+    - ./gradlew                       # but this is easier to override with a profile, see `interactive` profile below)
+    - bootRun
+    build:
+      kaniko:                         # Build using kaniko (inside the Kubernetes cluster instead of with local Docker daemon)
+        cache: true
+        snapshotMode: full
+        options:
+          target: build               # Build target for multi-stage Dockerfiles (use stage where source code is available)
+deployments:                          # What should be deployed
+- name: spring-demo                   # Deployment name will be used as helm release name
+  helm:                               # Deploy using helm (see docs for `kubectl` deployments or kustomizations)
+    componentChart: true              # Uses the component helm chart: https://devspace.sh/component-chart/docs/introduction
+    values:
+      containers:
+      - image: ${IMAGE}               # Use same var as above for providing image to be pulled for this container
+      service:                        # Create Kubernetes services for this container/deployment
+        ports:
+        - port: 8080
+- name: fitnesse
+  helm:
+    componentChart: true
+    values:
+      containers:
+      - image: itmagix/fitnesse
+      service:
+        ports:
+        - port: 8080
+vars:                                 # Config variables (can also be defined in the config without explicit definition in this section)
+- name: IMAGE
+  question: "Where should your image be pushed to? (e.g. 'ecr.io/company/image' without tag)"
+dev:                                  # Config options for `devspace dev` command
+  ports:                              # Port forwarding
+  - imageName: app
+    forward:
+    - port: 8080
+    - port: 35729
+    - port: 5005
+  - labelSelector:
+      app.kubernetes.io/component: fitnesse
+    forward:
+    - port: 8081
+      remotePort: 8080                # Map different remote port because local port 8080 is already used in line 44
+  open:                               # Open these URLs in the browser after starting dev mode (waits until they respond with HTTP status 200)
+  - url: http://localhost:8080
+  - url: http://localhost:8081
+  - url: http://localhost:8090
+  sync:                               # Bi-directional file sync for hot reloading (also see options `localPath` and `containerPath`)
+  - imageName: app                    # Select container with image `app` (defined in `images` above)
+    excludePaths:
+    - .git/
+    uploadExcludePaths:
+    - devspace.yaml
+    onUpload:
+      restartContainer: true          # Restart container (re-execute entrypoint) after files have been uploaded
+    # execRemote:                     # Alternative command for restarting or rebuilding something after file uploads
+    #   command: ./gradlew
+    #   args:
+    #   - build
+  interactive:                        # Interactive mode (use `devspace dev -p interactive` -p/--profile)
+    terminal:                         # Open a terminal instead of showing logs
+      imageName: app
+commands:
+- name: debug
+  command: devspace dev --profile interactive
+profiles:
+- name: interactive                   # Profile for starting dev mode using terminal and with sleep entrpoint
+  patches:                            # Run: devspace dev -p interactive
+  - op: add
+    path: dev.interactive.defaultEnabled
+    value: true
+  - op: replace
+    path: images.app.entrypoint
+    value:
+    - sleep
+    - 99999999
+- name: production                    # Profile for deploying your application with a production like config
+  patches:                            # Run: devspace deploy -p production
+  - op: remove
+    path: images.app.injectRestartHelper
+  - op: remove
+    path: images.app.appendDockerfileInstructions
+  - op: remove
+    path: images.app.build.kaniko.options.target
