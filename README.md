@@ -13,6 +13,10 @@ If you are already using Loft, install the Loft plugin:
 ```bash
 devspace add plugin https://github.com/loft-sh/loft-devspace-plugin
 ```
+Then, log in to your Loft instance:
+```bash
+devspace login loft.company.tld
+```
 Then, create a space:
 ```bash
 devspace create space my-java-app
