@@ -1,4 +1,8 @@
 version: v1beta9                      # Config reference: https://devspace.sh/cli/docs/configuration/reference
+pullSecrets: 
+- registry: your-registry.com:5000
+  username: ${LOFT_USERNAME}          # Built-in variable provided by the loft plugin for DevSpace
+  password: ${REGISTRY_API_KEY}       # See `vars` section for this
 images:
   app:                                # Internal name of the image (will be refered in `dev` section below)
     image: ${IMAGE}                   # Where to push the image (also see `tags`, `dockerfile` and `context` options)
@@ -37,6 +41,9 @@ deployments:                          # What should be deployed
 vars:                                 # Config variables (can also be defined in the config without explicit definition in this section)
 - name: IMAGE
   question: "Where should your image be pushed to? (e.g. 'ecr.io/company/image' without tag)"
+- name: REGISTRY_API_KEY
+  question: "Please provide a registry api key (see https://... for how to generate one)"
+  password: true
 dev:                                  # Config options for `devspace dev` command
   ports:                              # Port forwarding
   - imageName: app
