@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # DevSpace Demo Project For Spring Boot (Gradle)
 This is a java spring boot application with a multi-stage Dockerfile and a `devspace.yaml` config file for Kubernetes based development.
 
@@ -77,4 +76,3 @@ devspace deploy -p production
 ```
 =======
 # devspace-java-spring-fitnesse
->>>>>>> e291ac9344d765d143f40bd8db251460fcffc4e2
