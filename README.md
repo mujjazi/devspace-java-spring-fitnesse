@@ -1,1 +1,0 @@
-# devspace-java-spring-fitnesse
