@@ -1,8 +1,4 @@
 version: v1beta9                      # Config reference: https://devspace.sh/cli/docs/configuration/reference
-pullSecrets: 
-- registry: your-registry.com:5000
-  username: ${LOFT_USERNAME}          # Built-in variable provided by the loft plugin for DevSpace
-  password: ${REGISTRY_API_KEY}       # See `vars` section for this
 images:
   app:                                # Internal name of the image (will be refered in `dev` section below)
     image: ${IMAGE}                   # Where to push the image (also see `tags`, `dockerfile` and `context` options)
@@ -14,9 +10,7 @@ images:
     - ./gradlew                       # but this is easier to override with a profile, see `interactive` profile below)
     - bootRun
     build:
-      kaniko:                         # Build using kaniko (inside the Kubernetes cluster instead of with local Docker daemon)
-        cache: true
-        snapshotMode: full
+      docker:                         # Build using kaniko (inside the Kubernetes cluster instead of with local Docker daemon)
         options:
           target: build               # Build target for multi-stage Dockerfiles (use stage where source code is available)
 deployments:                          # What should be deployed
@@ -43,7 +37,7 @@ vars:                                 # Config variables (can also be defined in
   question: "Where should your image be pushed to? (e.g. 'ecr.io/company/image' without tag)"
 - name: REGISTRY_API_KEY
   question: "Please provide a registry api key (see https://... for how to generate one)"
-  password: true
+  password: false
 dev:                                  # Config options for `devspace dev` command
   ports:                              # Port forwarding
   - imageName: app
