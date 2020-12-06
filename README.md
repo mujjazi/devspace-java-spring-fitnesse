@@ -9,15 +9,7 @@ Make sure to also check-out the [DevSpace Onboarding Guide](https://devspace.sh/
 See [DevSpace documentation](https://devspace.sh/cli/docs/getting-started/installation) for details.
 
 ### 2. Prepare Kube-Context
-If you are already using Loft, install the Loft plugin:
-```bash
-devspace add plugin https://github.com/loft-sh/loft-devspace-plugin
-```
-Then, log in to your Loft instance:
-```bash
-devspace login loft.company.tld
-```
-Then, create a space:
+create a space:
 ```bash
 devspace create space my-java-app
 ```
@@ -74,5 +66,4 @@ Deploy using production-like config:
 ```bash
 devspace deploy -p production
 ```
-=======
 # devspace-java-spring-fitnesse
